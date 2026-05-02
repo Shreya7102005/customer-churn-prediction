@@ -24,13 +24,16 @@ if __name__=="__main__":
     #print("Features shape:",X.shape)
     #print("Target shape:",y.shape)
 
+    
+
+    #identify which columns have categorical value
+    #print(X.dtypes)
+
     #koi koi categorical value wale output ko 0/1 ke form m convert krna h
     binaer_cols=['Partner','Dependents','PhoneService','PaperlessBilling']
     for col in binaer_cols:
         X[col]=X[col].map({'Yes':1 ,'No':0})
     print(X[['Partner', 'Dependents', 'PhoneService', 'PaperlessBilling']].head())
 
-    #identify which columns have categorical value
-    #print(X.dtypes)
-
+    
 
