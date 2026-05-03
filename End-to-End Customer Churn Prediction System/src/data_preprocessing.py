@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, accuracy_score
+import joblib
 
 data_path="data/Telco-Customer-Churn.csv"
 
@@ -61,7 +62,21 @@ if __name__=="__main__":
 
     #print("Sample Predictions:", y_pred[:10])
 
-    print("\nAccuracy:", accuracy_score(y_test, y_pred))
+    #print("\nAccuracy:", accuracy_score(y_test, y_pred))
 
-    print("\nClassification Report:\n")
-    print(classification_report(y_test, y_pred))
+    #print("\nClassification Report:\n")
+    #print(classification_report(y_test, y_pred))
+
+    joblib.dump(model, "models/churn_model.pkl")
+    #print("Model saved successfully!")
+
+    # Load the saved model
+    loaded_model = joblib.load("models/churn_model.pkl")
+
+    # Take one sample from test data
+    sample = X_test.iloc[0:1]
+
+    # Make prediction
+    prediction = loaded_model.predict(sample)
+
+    print("\nSample Prediction:", prediction)
