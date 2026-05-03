@@ -1,4 +1,7 @@
 import pandas as pd 
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+
 data_path="data/Telco-Customer-Churn.csv"
 
 def load_data():
@@ -6,11 +9,14 @@ def load_data():
     return df
 
 def clean_data(df):
-    df['TotalCharges']=pd.to_numeric(df['TotalCharges'],errors='coerce')
-    df['TotalCharges'].fillna(df['TotalCharges'].median(),inplace=True)
-    df.drop('customerID',axis=1,inplace=True)
-    df['Churn']=df['Churn'].map({'Yes':1,'No':0})
-    return df 
+    df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
+    df['TotalCharges'] = df['TotalCharges'].fillna(df['TotalCharges'].median())
+
+    df.drop('customerID', axis=1, inplace=True)
+
+    df['Churn'] = df['Churn'].map({'Yes': 1, 'No': 0})
+
+    return df
 
 if __name__=="__main__":
     df=load_data()
@@ -33,7 +39,23 @@ if __name__=="__main__":
     binaer_cols=['Partner','Dependents','PhoneService','PaperlessBilling']
     for col in binaer_cols:
         X[col]=X[col].map({'Yes':1 ,'No':0})
-    print(X[['Partner', 'Dependents', 'PhoneService', 'PaperlessBilling']].head())
+    #print(X[['Partner', 'Dependents', 'PhoneService', 'PaperlessBilling']].head())
 
-    
+    categorical_cols = X.select_dtypes(include='object').columns
+    #print("Categorical columns:", categorical_cols)
+    X = pd.get_dummies(X, columns=categorical_cols, drop_first=True)
+    #print("\nAfter Encoding:")
+    #print(X.head())
+    #print("\nShape:", X.shape)
 
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    #print("Train shape:", X_train.shape)
+    #print("Test shape:", X_test.shape)
+
+    model = RandomForestClassifier(random_state=42)
+
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+
+    print("Sample Predictions:", y_pred[:10])
