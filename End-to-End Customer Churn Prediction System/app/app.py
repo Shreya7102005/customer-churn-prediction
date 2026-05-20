@@ -2,8 +2,10 @@ import streamlit as st
 import sys
 import os
 
-# Allow importing from src
-sys.path.append(os.path.abspath("src"))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SRC_DIR = os.path.join(BASE_DIR, "src")
+
+sys.path.append(SRC_DIR)
 
 from predict import predict_churn
 
