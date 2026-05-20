@@ -8,7 +8,12 @@ model_columns = joblib.load("models/model_columns.pkl")
 
 # Load training data for LIME context
 X_train = pd.read_csv("data/Telco-Customer-Churn.csv")
-
+explainer = LimeTabularExplainer(
+    training_data=X_train.values,
+    feature_names=X_train.columns.tolist(),
+    class_names=['No Churn', 'Churn'],
+    mode='classification'
+)
 
 def predict_churn(customer_data):
     df = pd.DataFrame([customer_data])
