@@ -1,15 +1,23 @@
 import joblib
 import pandas as pd
+import os
 from lime.lime_tabular import LimeTabularExplainer
 
-# Load saved model and column structure
-model = joblib.load("models/churn_model.pkl")
-model_columns = joblib.load("models/model_columns.pkl")
+# Absolute project paths
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Load original training data
-train_df = pd.read_csv("data/Telco-Customer-Churn.csv")
+MODEL_PATH = os.path.join(BASE_DIR, "models", "churn_model.pkl")
+COLUMNS_PATH = os.path.join(BASE_DIR, "models", "model_columns.pkl")
+DATA_PATH = os.path.join(BASE_DIR, "data", "Telco-Customer-Churn.csv")
 
-# Same preprocessing as training
+# Load model files
+model = joblib.load(MODEL_PATH)
+model_columns = joblib.load(COLUMNS_PATH)
+
+# Load training data
+train_df = pd.read_csv(DATA_PATH)
+
+# Preprocessing
 train_df['TotalCharges'] = pd.to_numeric(train_df['TotalCharges'], errors='coerce')
 train_df['TotalCharges'] = train_df['TotalCharges'].fillna(train_df['TotalCharges'].median())
 train_df.drop('customerID', axis=1, inplace=True)
@@ -27,10 +35,10 @@ for col in binary_cols:
 categorical_cols = X_train.select_dtypes(include='object').columns
 X_train = pd.get_dummies(X_train, columns=categorical_cols, drop_first=True)
 
-# Match exact training columns
+# Match columns
 X_train = X_train.reindex(columns=model_columns, fill_value=0)
 
-# Create LIME explainer
+# LIME explainer
 explainer = LimeTabularExplainer(
     training_data=X_train.values,
     feature_names=X_train.columns.tolist(),
@@ -49,11 +57,14 @@ def predict_churn(customer_data):
     # One-hot encoding
     df = pd.get_dummies(df)
 
-    # Match model columns
+    # Match training columns
     df = df.reindex(columns=model_columns, fill_value=0)
 
     # Prediction
     prediction = model.predict(df)
+
+    # Probability
+    probability = model.predict_proba(df)[0][1]
 
     # LIME explanation
     explanation = explainer.explain_instance(
@@ -61,36 +72,6 @@ def predict_churn(customer_data):
         model.predict_proba
     )
 
-    print("\nWhy this prediction happened:")
-    for feature, weight in explanation.as_list():
-        print(f"{feature}: {weight}")
+    explanation_list = explanation.as_list()
 
-    return prediction[0]
-
-
-# Sample customer
-sample_customer = {
-    'gender': 'Female',
-    'SeniorCitizen': 0,
-    'Partner': 'Yes',
-    'Dependents': 'No',
-    'tenure': 5,
-    'PhoneService': 'Yes',
-    'MultipleLines': 'No',
-    'InternetService': 'Fiber optic',
-    'OnlineSecurity': 'No',
-    'OnlineBackup': 'Yes',
-    'DeviceProtection': 'No',
-    'TechSupport': 'No',
-    'StreamingTV': 'Yes',
-    'StreamingMovies': 'No',
-    'Contract': 'Month-to-month',
-    'PaperlessBilling': 'Yes',
-    'PaymentMethod': 'Electronic check',
-    'MonthlyCharges': 85.5,
-    'TotalCharges': 400.0
-}
-
-result = predict_churn(sample_customer)
-
-print("\nPrediction:", result)
+    return prediction[0], probability, explanation_list
