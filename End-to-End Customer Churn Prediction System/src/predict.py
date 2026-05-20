@@ -2,10 +2,12 @@ import joblib
 import pandas as pd
 from lime.lime_tabular import LimeTabularExplainer
 
-
 # Load saved model and column structure
 model = joblib.load("models/churn_model.pkl")
 model_columns = joblib.load("models/model_columns.pkl")
+
+# Load training data for LIME context
+X_train = pd.read_csv("data/Telco-Customer-Churn.csv")
 
 
 def predict_churn(customer_data):
@@ -28,7 +30,7 @@ def predict_churn(customer_data):
     return prediction[0]
 
 
-# Test prediction
+# Sample test customer
 sample_customer = {
     'gender': 'Female',
     'SeniorCitizen': 0,
@@ -50,7 +52,6 @@ sample_customer = {
     'MonthlyCharges': 85.5,
     'TotalCharges': 400.0
 }
-
 
 result = predict_churn(sample_customer)
 
