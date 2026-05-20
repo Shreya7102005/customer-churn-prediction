@@ -1,5 +1,6 @@
 import joblib
 import pandas as pd
+from lime.lime_tabular import LimeTabularExplainer
 
 
 # Load saved model and column structure
