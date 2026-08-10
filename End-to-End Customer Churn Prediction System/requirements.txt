@@ -3,7 +3,4 @@ pandas
 scikit-learn
 joblib
 lime
-numpy
-scipy
 matplotlib
-scikit-image
